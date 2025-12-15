@@ -26,7 +26,7 @@ class Game(arcade.Window):
 
         self.Menu = MenuObject("Menu", Transform(150, 150, scale = 100))
 
-        # self.game_objects.append(self.Ball)
+        self.game_objects.append(self.Ball)
         self.game_objects.append(self.Menu)
         self.keys_pressed = set()
 
@@ -34,7 +34,7 @@ class Game(arcade.Window):
         self.clear()
         arcade.draw_texture_rect(
             self.bg_texture,
-            arcade.rect.XYWH(
+            arcade.rect.XYWH( 
                 self.width // 2,
                 self.height // 2,
                 self.width,

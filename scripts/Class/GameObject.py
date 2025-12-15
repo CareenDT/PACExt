@@ -1,5 +1,4 @@
 import arcade
-from ..globals import WIDTH,HEIGHT
 from typing import List, Type, Dict, Optional, Any
 
 class Component:
@@ -64,7 +63,9 @@ class GameObject():
     
     def remove_component(self, component: Component):
         """Remove a specific component"""
+
         comp_type = type(component)
+
         if comp_type in self.components and component in self.components[comp_type]:
             component.destroy()
             self.components[comp_type].remove(component)
@@ -89,7 +90,7 @@ class GameObject():
     
     def get_all_components(self) -> List[Component]:
 
-        """Get a flat list of all components (regardless of type)"""
+        """Get list of all components"""
 
         all_components = []
 
