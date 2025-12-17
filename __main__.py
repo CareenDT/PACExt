@@ -1,7 +1,7 @@
 import arcade
 from scripts.globals import HEIGHT, WIDTH
 from scripts.Menu import MenuObject
-from scripts.Class.GameObject import GameObject, Transform, Components
+from scripts.Class.GameObject import GameObject, Transform, Components, FrameAnimation
 
 class Game(arcade.Window):
     def __init__(self, title: str):
@@ -21,6 +21,19 @@ class Game(arcade.Window):
         self.Ball = GameObject("Ball", Transform(0,0))
         self.Ball.add_component(Components.SpriteRenderer("assets/images/RedBall.png",1)).add_to_batch(self.Object_Batch)
         self.Ball.add_component(Components.ScreenRelativeTransform(self,0.5,0.5,1,1))
+
+        self.Ball.get_component(Components.SpriteRenderer).set_Animation(FrameAnimation(
+                [
+                    "assets/images/Effects/Static/1.png",
+                    "assets/images/Effects/Static/2.png",
+                    "assets/images/Effects/Static/3.png",
+                    "assets/images/Effects/Static/4.png"
+                ],
+                FPS= 50,
+                PlayOnStart=True,
+                IsLooped=True
+            )
+        )
 
         self.Ball.add_component(Components.AspectRatio())
 

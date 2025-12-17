@@ -145,18 +145,24 @@ class ScreenRelativeTransform(Component):
         self.game_object.transform.scale = arcade.Vec2(self.RelativeScaleX * self.RelativeTo.width, self.RelativeScaleY * self.RelativeTo.height)
 
 
-class SpriteComponent(Component):
+class SpriteRendererComponent(Component):
     """Sprite component"""
     
-    def __init__(self, image_path, scale=1.0):
+    def __init__(self, image_path, scale=1.0, animation: FrameAnimation = None):
         super().__init__()
-        self.batch = None
+        self.batch: arcade.SpriteList = None
 
-        self.sprite = arcade.Sprite(image_path, scale)
+        self.sprite: arcade.Sprite = arcade.Sprite(image_path, scale)
+
+        self.Animation: FrameAnimation = animation
     
     def start(self):
         if self.game_object and self.game_object.transform:
             self.sync_with_transform()
+
+    def set_Animation(self, anim: FrameAnimation):
+        self.Animation = anim
+        anim.Bind(self)
 
     def sync_with_transform(self):
         """Update sprite to match GameObject's transform"""
@@ -174,6 +180,10 @@ class SpriteComponent(Component):
     def update(self, delta_time):
         self.sync_with_transform()
         self.sprite.update()
+
+        if self.Animation:
+            if self.Animation.IsPlaying:
+                self.Animation.on_update(delta_time)
     
     def on_draw(self):
         if not self.batch:
@@ -185,6 +195,36 @@ class SpriteComponent(Component):
             self.batch.remove(self.sprite)
         self.batch = sprite_list
         sprite_list.append(self.sprite)
+
+
+class FrameAnimation:
+    def __init__(self, Textures: List[str], FPS:int = 2, PlayOnStart:bool = False, IsLooped:bool = False):
+        self.TextureList = [arcade.load_texture(T) for T in Textures]
+
+        self.IsLooped = IsLooped
+        self.IsPlaying = PlayOnStart
+
+        self.FPS = FPS
+        self.Sprite: SpriteRendererComponent = None
+
+        self._elapsed = 0
+
+        self._index = 0
+
+    def Bind(self, To: SpriteRendererComponent):
+        self.Sprite = To
+
+    def _next(self):
+        if self.Sprite:
+            self.Sprite.sprite.texture = self.TextureList[(int)(self._index)]
+
+    def on_update(self, delta_time):
+        if self.Sprite:
+            self._elapsed += delta_time
+            if self._elapsed >= 1 / self.FPS:
+                self._index = (self._index + (self._elapsed / (1 / self.FPS))) % len(self.TextureList)
+                self._next()
+                self._elapsed %= 1 / self.FPS
 
 class AspectRatioComponent(Component):
     def __init__(self, Ratio:float = 1, RelativeToX:bool = True, game_object: 'GameObject' = None):
@@ -224,5 +264,5 @@ class BoxRenderer(Component):
 class Components:
     AspectRatio = AspectRatioComponent
     ScreenRelativeTransform = ScreenRelativeTransform
-    SpriteRenderer = SpriteComponent
+    SpriteRenderer = SpriteRendererComponent
     BoxRenderer = BoxRenderer
